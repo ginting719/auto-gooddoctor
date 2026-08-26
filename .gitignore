@@ -1,8 +1,7 @@
 # Dependencies
 node_modules/
 
-# Konfigurasi rahasia — jangan pernah commit
-.env
+# Konfigurasi lokal (kecuali .env yang sengaja di-commit)
 .env.local
 .env.*.local
 
