@@ -1,0 +1,26 @@
+# Render Blueprint — deploy otomatis dari repo GitHub.
+# Cara pakai: di dashboard Render, pilih "New + > Blueprint",
+# lalu pilih repo ini. Render akan membaca file ini dan membuat service.
+#
+# Env vars yang dipakai aplikasi:
+#   GDT_SPREADSHEET_ID, STOCK_SPREADSHEET_ID, LOG_WEBAPP_URL, ADMIN_PASSWORD
+# Isi nilainya di dashboard Render > service > Environment,
+# ATAU lewat Render Dashboard > Blueprint (prompt "envVars").
+
+services:
+  - type: web
+    name: auto-gooddoctor
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: GDT_SPREADSHEET_ID
+        sync: false
+      - key: STOCK_SPREADSHEET_ID
+        sync: false
+      - key: LOG_WEBAPP_URL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false

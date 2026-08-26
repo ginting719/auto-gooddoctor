@@ -3,7 +3,7 @@
 Web app (tanpa dependency) untuk meng-generate stok baru dari template CSV,
 berdasarkan stock per toko (sheet STOCK) dan Item Factor (sheet GDT).
 
-## Setup
+## Setup (lokal)
 
 1. Salin `.env.example` menjadi `.env`:
    ```
@@ -24,6 +24,26 @@ berdasarkan stock per toko (sheet STOCK) dan Item Factor (sheet GDT).
    node server.js
    ```
 4. Buka `http://localhost:3000`.
+
+## Deploy ke Render
+
+Repo ini sudah menyertakan `render.yaml` (Render Blueprint), jadi deploy
+hampir otomatis:
+
+1. Push kode ke GitHub.
+2. Buka [dashboard.render.com](https://dashboard.render.com) →
+   **New +** → **Blueprint** → pilih repo `auto-gooddoctor`.
+3. Saat Render membuat service, isi **Environment Variables** ini
+   (nilai sama seperti `.env` lokal kamu):
+   - `GDT_SPREADSHEET_ID`
+   - `STOCK_SPREADSHEET_ID`
+   - `LOG_WEBAPP_URL`
+   - `ADMIN_PASSWORD`
+4. Klik **Apply**. Render build (`npm install`) lalu start
+   (`node server.js`) dan memberi URL publik `https://auto-gooddoctor.onrender.com`.
+
+> Catatan: jangan pernah mengisi nilai rahasia di `render.yaml` atau file
+> lain yang di-commit — gunakan Environment Variables di dashboard Render.
 
 ## Alur pengguna
 
@@ -82,6 +102,7 @@ Jika URL belum diisi, log dilewati tanpa error sehingga download tetap berjalan.
 
 ```
 server.js           // HTTP server + API (stores, generate, log, admin, refresh)
+render.yaml         // Blueprint deploy otomatis ke Render
 lib/config.js       // baca konfigurasi dari env/.env (rahasia tidak di-commit)
 lib/csv.js          // parser/serializer CSV (mendukung field ber-tanda kutip)
 lib/sheets.js       // fetch + parse Google Sheets (GDT, STOCK, TEMPLATE, LOG)
