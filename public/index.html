@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Automation GoodDoctor</title>
+  <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/ginting719/Audio/LOGO-01.png" />
+  <style>
+    :root {
+      --bg: #eef2f7;
+      --surface: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --brand: #2563eb;
+      --brand-2: #4f46e5;
+      --brand-soft: #eff4ff;
+      --ring: rgba(37, 99, 235, .28);
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(17, 24, 39, .07);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Atribut hidden harus selalu menang atas display lain (mis. flex). */
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(1100px 500px at 85% -10%, rgba(79, 70, 229, .14), transparent 60%),
+        radial-gradient(900px 420px at -10% 0%, rgba(37, 99, 235, .12), transparent 55%),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 40px 20px 64px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(420px, 1.35fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .side-card {
+      position: sticky;
+      top: 24px;
+    }
+
+    .side-hint {
+      margin: 0;
+      padding: 18px 16px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      background: #f8fafc;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* Header */
+    .hero {
+      margin-bottom: 28px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+    }
+
+    .brand-row .brand-logo {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+    }
+
+    .sync-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      white-space: nowrap;
+      animation: syncPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes syncPulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: .45;
+      }
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    .card.compact {
+      padding: 22px 24px;
+    }
+
+    .step-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      margin: 0 0 12px;
+    }
+
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 21px;
+      height: 21px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      flex: none;
+    }
+
+    /* Store select */
+    .field-label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    .store-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--ink);
+      background: #fafbfc;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      transition: border-color .15s, box-shadow .15s, background .15s;
+    }
+
+    .store-input:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px var(--ring);
+      background: #fff;
+    }
+
+    .store-input:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .ac-list {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 6px);
+      max-height: 260px;
+      overflow-y: auto;
+      margin: 0;
+      padding: 6px;
+      list-style: none;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 12px 28px rgba(17, 24, 39, .14);
+      z-index: 20;
+    }
+
+    .ac-list li {
+      padding: 9px 10px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .ac-list li:hover,
+    .ac-list li.active {
+      background: var(--brand-soft);
+      color: var(--brand-2);
+    }
+
+    .ac-list li.empty {
+      color: var(--muted);
+      cursor: default;
+    }
+
+    .ac-list li.empty:hover {
+      background: transparent;
+      color: var(--muted);
+    }
+
+    /* Template info */
+    .template-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fafbfc;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .template-info .tpl-title {
+      font-weight: 650;
+      color: var(--ink);
+    }
+
+    .template-info .tpl-badge {
+      flex: none;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--brand-2);
+      background: var(--brand-soft);
+      border-radius: 999px;
+      padding: 3px 9px;
+    }
+
+    .tpl-spinner {
+      flex: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      border-top-color: var(--brand);
+      animation: tplspin .8s linear infinite;
+    }
+
+    @keyframes tplspin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Generate button */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      transition: transform .08s, box-shadow .15s, opacity .15s;
+    }
+
+    .btn svg {
+      flex: none;
+    }
+
+    .btn-generate {
+      width: 100%;
+      padding: 12px;
+      margin-top: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 8px 18px rgba(37, 99, 235, .32);
+    }
+
+    .btn-generate:hover:not(:disabled) {
+      box-shadow: 0 10px 22px rgba(37, 99, 235, .4);
+      transform: translateY(-1px);
+    }
+
+    .btn-generate:active:not(:disabled) {
+      transform: translateY(0) scale(.99);
+    }
+
+    .btn-generate:disabled {
+      background: linear-gradient(135deg, #a5b4fc, #93c5fd);
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .btn-generate.loading {
+      pointer-events: none;
+    }
+
+    /* Status */
+    .status {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13.5px;
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .status.success {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+
+    .status.error {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .status.info {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    /* Result summary */
+    .results {
+      padding-top: 4px;
+    }
+
+    .results h2 {
+      font-size: 14px;
+      font-weight: 700;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    .stat .num {
+      font-size: 26px;
+      font-weight: 750;
+      letter-spacing: -.02em;
+    }
+
+    .stat .num.good {
+      color: #059669;
+    }
+
+    .stat .num.warn {
+      color: #d97706;
+    }
+
+    .stat .num.bad {
+      color: #dc2626;
+    }
+
+    .stat .lbl {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .download-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-download {
+      padding: 12px 20px;
+      color: #fff;
+      background: linear-gradient(135deg, #059669, #047857);
+      box-shadow: 0 8px 18px rgba(5, 150, 105, .32);
+    }
+
+    .btn-download:hover {
+      box-shadow: 0 10px 22px rgba(5, 150, 105, .4);
+      transform: translateY(-1px);
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #9aa3b2;
+    }
+
+    /* ---- Admin: floating lock ---- */
+    .admin-lock {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 60;
+      width: 54px;
+      height: 54px;
+      border: none;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 10px 24px rgba(37, 99, 235, .4);
+      cursor: pointer;
+      transition: transform .12s, box-shadow .15s;
+    }
+
+    .admin-lock:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(37, 99, 235, .5);
+    }
+
+    /* ---- Admin: modal ---- */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, .45);
+      backdrop-filter: blur(2px);
+      padding: 20px;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 360px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(17, 24, 39, .25);
+      padding: 24px;
+    }
+
+    .modal-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 750;
+      margin: 0 0 6px;
+    }
+
+    .modal-sub {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn-plain {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid var(--line);
+    }
+
+    .btn-plain:hover {
+      background: #e2e8f0;
+    }
+
+    /* ---- Admin: dashboard ---- */
+    .admin-dash {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: flex;
+      background: #f1f5f9;
+    }
+
+    .dash-side {
+      width: 232px;
+      flex: none;
+      background: linear-gradient(180deg, #1e293b, #0f172a);
+      color: #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 14px;
+      gap: 8px;
+    }
+
+    .dash-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px 18px;
+      border-bottom: 1px solid rgba(148, 163, 184, .18);
+      margin-bottom: 12px;
+    }
+
+    .dash-logo {
+      width: 38px;
+      height: 38px;
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 11px;
+      background: rgba(37, 99, 235, .9);
+      font-size: 18px;
+    }
+
+    .dash-brand-title {
+      font-weight: 750;
+      color: #fff;
+      font-size: 15px;
+      line-height: 1.2;
+    }
+
+    .dash-brand-sub {
+      font-size: 11.5px;
+      color: #94a3b8;
+      line-height: 1.3;
+    }
+
+    .dash-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .dash-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: #cbd5e1;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: background .12s, color .12s;
+    }
+
+    .dash-nav-item:hover {
+      background: rgba(148, 163, 184, .12);
+      color: #fff;
+    }
+
+    .dash-nav-item.active {
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff;
+    }
+
+    .dash-side-foot {
+      padding-top: 10px;
+      border-top: 1px solid rgba(148, 163, 184, .18);
+    }
+
+    .dash-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .dash-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 26px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dash-title {
+      font-size: 19px;
+      font-weight: 750;
+      margin: 0;
+      letter-spacing: -.01em;
+    }
+
+    .dash-view {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px 26px 32px;
+    }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .dash-stat {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+
+    .dash-stat-num {
+      font-size: 26px;
+      font-weight: 780;
+      letter-spacing: -.02em;
+      color: var(--brand-2);
+      line-height: 1.2;
+    }
+
+    .dash-stat-lbl {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+      font-weight: 600;
+    }
+
+    .dash-panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .dash-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dash-panel-head h2 {
+      font-size: 15px;
+      font-weight: 750;
+      margin: 0;
+    }
+
+    .dash-filters {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .dash-filters .store-input {
+      width: auto;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    .dash-filters input[type="text"] {
+      width: 200px;
+    }
+
+    .filter-sep {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .dash-table-wrap {
+      overflow-x: auto;
+    }
+
+    .dash-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    .dash-table th {
+      text-align: left;
+      padding: 11px 18px;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .dash-table td {
+      padding: 12px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--ink);
+    }
+
+    .dash-table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .dash-table td.tgl {
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .dash-table td.jam {
+      color: var(--brand-2);
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .dash-empty {
+      padding: 36px 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+
+    .dash-panel-foot {
+      padding: 10px 18px;
+      border-top: 1px solid var(--line);
+      background: #f8fafc;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      color: #475569;
+    }
+
+    .icon-btn:hover {
+      background: #eef2f7;
+    }
+
+    .btn-sm {
+      padding: 7px 14px;
+      font-size: 13px;
+      border-radius: 9px;
+    }
+
+    .log-count {
+      font-size: 12.5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    @media (max-width: 760px) {
+      .admin-dash {
+        flex-direction: column;
+      }
+
+      .dash-side {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        padding: 12px 14px;
+      }
+
+      .dash-brand {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding: 0;
+        flex: 1;
+      }
+
+      .dash-nav {
+        flex-direction: row;
+        flex: none;
+      }
+
+      .dash-side-foot {
+        border-top: none;
+        padding-top: 0;
+      }
+
+      .dash-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side-card {
+        position: static;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        padding: 24px 16px 48px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .brand-row {
+        gap: 16px;
+      }
+
+      .brand-row .brand-logo {
+        width: 52px;
+        height: 52px;
+      }
+
+      .sync-title {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="brand-row">
+        <img class="brand-logo" src="https://cdn.jsdelivr.net/gh/ginting719/Audio/LOGO-01.png" alt="ALPRO" />
+        <div class="sync-title">Synchronizing</div>
+        <img class="brand-logo" src="https://www.mnctrijaya.com/uploads/news/good-doctor-logo.png" alt="Good Doctor" />
+      </div>
+    </header>
+
+    <div class="layout">
+      <main class="card compact">
+        <h2 class="step-title">
+          <span class="step-num">1</span> Pilih Toko
+        </h2>
+        <label class="field-label" for="storeInput">Nama toko</label>
+        <div class="select-wrap">
+          <input type="text" id="storeInput" class="store-input"
+            placeholder="Ketik nama toko… (misal: apotek alpro tebet timur)" autocomplete="off" disabled />
+          <ul class="ac-list" id="storeList" hidden></ul>
+        </div>
+
+        <h2 class="step-title" style="margin-top: 26px;">
+          <span class="step-num">2</span> Template Produk
+        </h2>
+        <div class="template-info" id="templateInfo">
+          <span class="tpl-spinner"></span> Memuat template otomatis…
+        </div>
+
+        <button class="btn btn-generate" id="generateBtn" disabled>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <path d="m16 10-4-4-4 4" />
+            <path d="M12 6v12" />
+          </svg>
+          <span id="generateLabel">Generate</span>
+        </button>
+
+        <div class="status" id="status"></div>
+      </main>
+
+      <aside class="card side-card">
+        <h2 class="step-title" style="margin:0 0 14px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" style="color:#2563eb">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+          Ringkasan Hasil
+        </h2>
+        <div id="results">
+          <p class="side-hint">Hasil ringkasan akan muncul di sini setelah menekan tombol Generate.</p>
+        </div>
+      </aside>
+    </div>
+
+    <p class="footer-note">Data toko & produk diambil langsung dari database (STOCK &amp; GDT).</p>
+  </div>
+
+  <!-- Admin: floating lock widget -->
+  <button id="adminLock" class="admin-lock" title="Admin Log" aria-label="Buka panel admin">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  </button>
+
+  <!-- Admin: password modal -->
+  <div class="modal-overlay" id="adminModal" hidden>
+    <div class="modal">
+      <h3 class="modal-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" style="color:#2563eb">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+        Akses Admin
+      </h3>
+      <p class="modal-sub">Masukkan password untuk masuk ke dashboard admin.</p>
+      <input type="password" id="adminPass" class="store-input" placeholder="Password admin" autocomplete="off" />
+      <div class="modal-actions">
+        <button class="btn btn-download" id="adminLoginBtn">Masuk</button>
+        <button class="btn btn-plain" id="adminCancelBtn">Batal</button>
+      </div>
+      <div class="status" id="adminStatus"></div>
+    </div>
+  </div>
+
+  <!-- Admin: dashboard -->
+  <div class="admin-dash" id="adminDash" hidden>
+    <aside class="dash-side">
+      <div class="dash-brand">
+        <span class="dash-logo">🔒</span>
+        <div>
+          <div class="dash-brand-title">Admin</div>
+          <div class="dash-brand-sub">Generator Update Stok</div>
+        </div>
+      </div>
+      <nav class="dash-nav">
+        <button class="dash-nav-item active" data-view="log">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+          Log
+        </button>
+      </nav>
+      <div class="dash-side-foot">
+        <button class="dash-nav-item" id="adminLogout">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="m16 17 5-5-5-5" />
+            <path d="M21 12H9" />
+          </svg>
+          Keluar
+        </button>
+      </div>
+    </aside>
+
+    <div class="dash-main">
+      <header class="dash-topbar">
+        <h1 class="dash-title">Dashboard Admin</h1>
+        <button class="btn-plain icon-btn" id="adminDashClose" aria-label="Tutup" title="Tutup">×</button>
+      </header>
+
+      <!-- View: Log -->
+      <section class="dash-view" id="view-log">
+        <div class="dash-grid">
+          <div class="dash-stat">
+            <div class="dash-stat-num" id="statTotal">0</div>
+            <div class="dash-stat-lbl">Total Log</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-num" id="statToko">0</div>
+            <div class="dash-stat-lbl">Toko Unik</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-num" id="statHariIni">0</div>
+            <div class="dash-stat-lbl">Log Hari Ini</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-num" id="statTerakhir">-</div>
+            <div class="dash-stat-lbl">Log Terakhir</div>
+          </div>
+        </div>
+
+        <div class="dash-panel">
+          <div class="dash-panel-head">
+            <h2>Log Update Stok</h2>
+            <div class="dash-filters">
+              <input type="text" id="logSearch" class="store-input" placeholder="Cari nama toko…" autocomplete="off" />
+              <input type="date" id="logDateFrom" class="store-input" />
+              <span class="filter-sep">–</span>
+              <input type="date" id="logDateTo" class="store-input" />
+              <button class="btn btn-plain btn-sm" id="adminLogRefresh">Refresh</button>
+            </div>
+          </div>
+          <div class="dash-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Jam</th>
+                  <th>Nama Toko</th>
+                </tr>
+              </thead>
+              <tbody id="logTableBody"></tbody>
+            </table>
+            <div class="dash-empty" id="logEmpty" hidden>Belum ada log yang cocok.</div>
+          </div>
+          <div class="dash-panel-foot">
+            <span id="adminLogCount" class="log-count"></span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
